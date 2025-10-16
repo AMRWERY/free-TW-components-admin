@@ -1,0 +1,50 @@
+<template>
+  <div>
+    <div class="min-h-screen">
+
+      <!-- main-layout  component -->
+      <main-layout>
+        <main class="flex-1 mx-auto">
+          <router-view v-slot="{ Component, route }">
+            <transition name="slide-fade">
+              <div :key="route.path">
+                <component :is="Component" :key="route.path" />
+              </div>
+            </transition>
+          </router-view>
+        </main>
+      </main-layout>
+    </div>
+
+    <!-- dynamic-toast component -->
+    <teleport to='body'>
+      <div class="fixed z-[9999] pointer-events-none top-10 start-1/2 -translate-x-1/2 w-full max-w-md">
+        <div class="pointer-events-auto flex justify-center">
+          <dynamic-toast v-if="showToast" :message="toastMessage" :toastType="toastType" :duration="toastDuration"
+            :toastIcon="toastIcon" @toastClosed="showToast = false" />
+        </div>
+      </div>
+    </teleport>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { RouterView } from 'vue-router'
+import { useToast } from './composables/useToast'
+import dynamicToast from './components/dynamic-toast.vue';
+import mainLayout from './components/layouts/main-layout.vue';
+
+const { showToast, toastMessage, toastType, toastIcon, toastDuration } = useToast()
+</script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

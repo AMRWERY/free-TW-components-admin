@@ -1,0 +1,26 @@
+@import "./tailwind.css";
+
+/* hide dialog scroll */
+.hide-scrollbar {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Webkit */
+}
+
+select {
+  -webkit-appearance: none; /* Chrome, Safari, Edge */
+  -moz-appearance: none; /* Firefox */
+  appearance: none; /* Standard */
+  background-image: none !important; /* Hide background arrow */
+}
+
+/* For IE/Edge old versions */
+select::-ms-expand {
+  display: none;
+}
