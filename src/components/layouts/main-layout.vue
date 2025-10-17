@@ -25,9 +25,9 @@
                     transition-transform duration-300 ease-in-out z-40
                     lg:fixed lg:top-0 lg:bottom-0 lg:block lg:h-screen">
 
-                    <div class="text-2xl font-bold mb-5 pb-4 border-b border-gray-800/50 flex-shrink-0">
+                    <div class="text-xl font-bold mb-5 pb-4 border-b border-gray-800/50 flex-shrink-0">
                         <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Collections</span>
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Free TW Components</span>
                     </div>
 
                     <div class="flex-1">
