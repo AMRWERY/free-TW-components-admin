@@ -18,8 +18,8 @@
 
     <!-- dynamic-toast component -->
     <teleport to='body'>
-      <div class="fixed z-[9999] pointer-events-none top-10 start-1/2 -translate-x-1/2 w-full max-w-md">
-        <div class="pointer-events-auto flex justify-center">
+      <div class="fixed z-[9999] pointer-events-none top-5 right-6 w-full max-w-md">
+        <div class="pointer-events-auto flex justify-end">
           <dynamic-toast v-if="showToast" :message="toastMessage" :toastType="toastType" :duration="toastDuration"
             :toastIcon="toastIcon" @toastClosed="showToast = false" />
         </div>
