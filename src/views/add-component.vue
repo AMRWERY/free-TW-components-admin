@@ -27,9 +27,16 @@
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label for="component"
-                            class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Component</label>
-                        <textarea name="component" v-model="componentCode"
+                        <label for="component-html"
+                            class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Component (Html Code)</label>
+                        <textarea name="component-html" v-model="componentCodeHtml"
+                            class="h-64 w-full rounded border bg-gray-50 px-3 py-2 text-gray-800"></textarea>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="component-script"
+                            class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Component (Script Code)</label>
+                        <textarea name="component-script" v-model="componentCodeScript"
                             class="h-64 w-full rounded border bg-gray-50 px-3 py-2 text-gray-800"></textarea>
                     </div>
 
@@ -62,7 +69,8 @@ const componentStore = useComponentStore();
 
 const selectedCategory = ref('');
 const componentName = ref('');
-const componentCode = ref('');
+const componentCodeHtml = ref('');
+const componentCodeScript = ref('');
 
 onMounted(async () => {
     await componentStore.fetchCategories();
@@ -70,7 +78,7 @@ onMounted(async () => {
 
 const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    if (!selectedCategory.value || !componentName.value || !componentCode.value) {
+    if (!selectedCategory.value || !componentName.value || !componentCodeHtml.value) {
         triggerToast({
             message: 'Please fill in all fields',
             type: 'warning',
@@ -78,7 +86,7 @@ const handleSubmit = async (e: Event) => {
         });
         return;
     }
-    await componentStore.addComponent(selectedCategory.value, componentName.value, componentCode.value);
+    await componentStore.addComponent(selectedCategory.value, componentName.value, componentCodeHtml.value, componentCodeScript.value);
     if (!componentStore.error) {
         triggerToast({
             message: 'Component added successfully!',
@@ -87,9 +95,14 @@ const handleSubmit = async (e: Event) => {
         });
         selectedCategory.value = '';
         componentName.value = '';
-        componentCode.value = '';
+        componentCodeHtml.value = '';
+        componentCodeScript.value = '';
     } else {
-        alert('Error: ' + componentStore.error);
+        triggerToast({
+            message: `Error: ${componentStore.error}`,
+            type: 'error',
+            icon: '/svg/error-icon.svg',
+        });
     }
 };
 </script>
