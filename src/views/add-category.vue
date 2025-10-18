@@ -62,7 +62,11 @@ const handleSubmit = async () => {
         });
         categoryName.value = "";
     } else {
-        alert("Error: " + categoryStore.error);
+        triggerToast({
+            message: `Error: ${categoryStore.error}`,
+            type: 'error',
+            icon: '/svg/error-icon.svg',
+        });
     }
 };
 </script>

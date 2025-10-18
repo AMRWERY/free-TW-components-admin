@@ -18,37 +18,23 @@ export const useComponentStore = defineStore("componentStore", {
   }),
 
   actions: {
-    // ✅ Add new component with HTML and script code
-    async addComponent(
-      category: string,
-      name: string,
-      codeHtml: string,
-      codeScript: string
-    ) {
+    // ✅ Add new component
+    async addComponent(category: string, name: string, code: string) {
       try {
         this.loading = true;
         const docRef = await addDoc(collection(db, "components"), {
           category,
           name,
-          codeHtml, // Store HTML code
-          codeScript, // Store script code
+          code,
           copy_count: 0,
           created_at: serverTimestamp(),
           route: name.toLowerCase().replace(/\s+/g, "-"),
         });
-        console.log("Component added with ID:", docRef.id, "Data:", {
-          category,
-          name,
-          codeHtml,
-          codeScript,
-        });
+        console.log("Component added with ID:", docRef.id);
         this.loading = false;
-        // Refresh components to reflect the new data
-        await this.fetchComponents();
       } catch (err: any) {
         this.error = err.message;
         this.loading = false;
-        console.error("Error adding component:", err);
       }
     },
 
