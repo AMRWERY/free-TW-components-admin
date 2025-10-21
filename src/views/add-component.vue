@@ -28,7 +28,7 @@
 
                     <div class="sm:col-span-2">
                         <label for="component" class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Component
-                            (Html Code)</label>
+                            Code</label>
                         <textarea name="component" v-model="componentCode"
                             class="h-64 w-full rounded border bg-gray-50 px-3 py-2 text-gray-800"></textarea>
                     </div>
