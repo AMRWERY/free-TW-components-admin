@@ -26,8 +26,8 @@
                     lg:fixed lg:top-0 lg:bottom-0 lg:block lg:h-screen">
 
                     <div class="text-xl font-bold mb-5 pb-4 border-b border-gray-800/50 flex-shrink-0">
-                        <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Free TW Components</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Free TW
+                            Components</span>
                     </div>
 
                     <div class="flex-1">
@@ -44,13 +44,13 @@
                                     </router-link>
                                 </li>
                                 <li class="relative flex justify-between items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-300 text-sm font-medium group"
-                                    :class="$route.path === '/add-component' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'">
-                                    <router-link to="/add-component" class="flex items-center justify-between w-full"
+                                    :class="$route.path === '/components' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'">
+                                    <router-link to="/components" class="flex items-center justify-between w-full"
                                         @click="sidebarOpen = false">
-                                        <div v-if="$route.path === '/add-component'"
+                                        <div v-if="$route.path === '/components'"
                                             class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full">
                                         </div>
-                                        <span class="flex-grow pl-2">Add Component</span>
+                                        <span class="flex-grow pl-2">Components</span>
                                     </router-link>
                                 </li>
                                 <li class="relative flex justify-between items-center px-3 py-3 rounded-lg cursor-pointer transition-all duration-300 text-sm font-medium group"

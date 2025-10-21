@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 
@@ -82,6 +83,20 @@ export const useComponentStore = defineStore("componentStore", {
         } else {
           throw new Error("Component not found");
         }
+      } catch (err: any) {
+        this.error = err.message;
+        this.loading = false;
+      }
+    },
+
+    async updateComponent(id: string, updates: any) {
+      try {
+        this.loading = true;
+        const docRef = doc(db, "components", id);
+        await updateDoc(docRef, updates);
+        // Refresh components after update
+        await this.fetchComponents();
+        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
         this.loading = false;

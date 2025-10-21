@@ -10,10 +10,10 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: "/add-component",
-      name: "add-component",
-      component: () => import("../views/add-component.vue"),
-      meta: { title: "Add Component" },
+      path: "/components",
+      name: "components",
+      component: () => import("../views/components.vue"),
+      meta: { title: "Components" },
     },
     {
       path: "/add-category",
