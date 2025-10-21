@@ -7,6 +7,7 @@ import {
   getDoc,
   serverTimestamp,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 
@@ -96,6 +97,19 @@ export const useComponentStore = defineStore("componentStore", {
         await updateDoc(docRef, updates);
         // Refresh components after update
         await this.fetchComponents();
+        this.loading = false;
+      } catch (err: any) {
+        this.error = err.message;
+        this.loading = false;
+      }
+    },
+
+    async deleteComponent(id: string) {
+      try {
+        this.loading = true;
+        const docRef = doc(db, "components", id);
+        await deleteDoc(docRef);
+        await this.fetchComponents(); // Refresh after deletion
         this.loading = false;
       } catch (err: any) {
         this.error = err.message;

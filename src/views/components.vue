@@ -88,7 +88,7 @@
                                                     data-original="#000000" />
                                             </svg>
                                         </button>
-                                        <button title="Delete" class="cursor-pointer">
+                                        <button title="Delete" class="cursor-pointer" @click="openDeleteDialog(index)">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="w-5 h-5 fill-red-500 hover:fill-red-700" viewBox="0 0 24 24">
                                                 <path
@@ -116,6 +116,10 @@
             <dynamic-dialog v-if="showDialog" :is-open="showDialog" :mode="dialogMode"
                 :categories="componentStore.categories" :initial-data="editComponent" :loading="componentStore.loading"
                 @close="closeDialog" @submit="handleDialogSubmit" />
+
+            <!-- delete-dialog component -->
+            <delete-dialog v-if="showDeleteDialog" :is-open="showDeleteDialog" :component-name="deleteComponentName"
+                @close="closeDeleteDialog" @delete="confirmDelete" />
         </div>
     </div>
 </template>
@@ -127,6 +131,7 @@ import type { Component } from "@/types/components";
 import { useToast } from "@/composables/useToast";
 import pagination from "@/components/pagination.vue";
 import dynamicDialog from "@/components/dynamic-dialog.vue";
+import deleteDialog from "@/components/delete-dialog.vue";
 
 const { triggerToast } = useToast();
 const componentStore = useComponentStore();
@@ -136,6 +141,9 @@ const currentPage = ref(1);
 const showDialog = ref(false);
 const dialogMode = ref<"add" | "edit">("add");
 const isRefreshing = ref(false);
+const showDeleteDialog = ref(false);
+const deleteComponentIndex = ref<number | null>(null);
+const deleteComponentName = ref<string>("");
 
 const paginatedComponents = computed(() => {
     const start = (currentPage.value - 1) * 20;
@@ -227,6 +235,45 @@ const refreshData = async () => {
     await componentStore.fetchComponents();
     isRefreshing.value = false;
     if (!componentStore.error) return
+};
+
+const openDeleteDialog = (index: number) => {
+    deleteComponentIndex.value = index;
+    const component = paginatedComponents.value[index];
+    if (component) {
+        deleteComponentName.value = component.name;
+        showDeleteDialog.value = true;
+    }
+};
+
+const closeDeleteDialog = () => {
+    showDeleteDialog.value = false;
+    deleteComponentIndex.value = null;
+    deleteComponentName.value = "";
+};
+
+const confirmDelete = async () => {
+    if (deleteComponentIndex.value !== null) {
+        const component = paginatedComponents.value[deleteComponentIndex.value];
+        if (component && component.id) {
+            await componentStore.deleteComponent(component.id);
+            if (!componentStore.error) {
+                triggerToast({
+                    message: "Component deleted successfully!",
+                    type: "success",
+                    icon: "/svg/check-circle-icon.svg",
+                });
+                await refreshData(); // Refresh table after deletion
+            } else {
+                triggerToast({
+                    message: `Error deleting component: ${componentStore.error}`,
+                    type: "error",
+                    icon: "/svg/error-icon.svg",
+                });
+            }
+        }
+        closeDeleteDialog();
+    }
 };
 
 onMounted(async () => {
