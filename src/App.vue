@@ -29,11 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-import { RouterView } from 'vue-router'
-import { useToast } from './composables/useToast'
-import dynamicToast from './components/shared/dynamic-toast.vue';
-import mainLayout from './components/layouts/main-layout.vue';
-
 const { showToast, toastMessage, toastType, toastIcon, toastDuration } = useToast()
 </script>
 

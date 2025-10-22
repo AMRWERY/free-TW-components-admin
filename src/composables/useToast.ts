@@ -1,4 +1,3 @@
-import { reactive, computed, readonly } from "vue";
 import type { ToastOptions } from "@/types/toast-options";
 
 const toastState = reactive<ToastOptions>({

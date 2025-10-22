@@ -105,15 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { useCategoryStore } from "@/stores/categoryStore";
 import type { Category } from "@/types/categories";
-import { useToast } from "@/composables/useToast";
-import pagination from "@/components/shared/pagination.vue";
-import dynamicDialog from "@/components/shared/dynamic-dialog.vue";
-import deleteDialog from "@/components/shared/delete-dialog.vue";
-import searchInput from "@/components/shared/search-input.vue";
-import skeletonTable from "@/components/shared/skeleton-table.vue";
 
 const { triggerToast } = useToast();
 const categoryStore = useCategoryStore();

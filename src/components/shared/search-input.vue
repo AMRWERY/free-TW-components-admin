@@ -27,8 +27,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from "vue";
-
 const props = defineProps<{
     modelValue: string;
     placeholder?: string;

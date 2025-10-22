@@ -29,7 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
 import type { Props } from '@/types/skeleton-table'
 
 const props = withDefaults(defineProps<Props>(), {

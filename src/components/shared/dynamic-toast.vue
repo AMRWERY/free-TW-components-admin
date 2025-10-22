@@ -19,8 +19,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
-
 const props = defineProps({
     message: {
         type: String,

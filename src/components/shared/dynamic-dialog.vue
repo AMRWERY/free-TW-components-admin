@@ -92,8 +92,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from "vue";
-
 const props = defineProps<{
     isOpen: boolean;
     mode: "add" | "edit";

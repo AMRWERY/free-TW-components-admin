@@ -62,7 +62,7 @@
                                     {{ component.copy_count }}
                                 </td>
                                 <td class="p-4">
-                                    <div class="flex items-center gap-4">
+                                    <div class="flex items-center justify-end gap-4">
                                         <button class="mr-3 cursor-pointer" title="Edit" v-if="editingIndex !== index"
                                             @click="openDialog('edit', index)">
                                             <svg xmlns="http://www.w3.org/2000/svg"
@@ -113,15 +113,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { useComponentStore } from "@/stores/componentStore";
 import type { Component } from "@/types/components";
-import { useToast } from "@/composables/useToast";
-import pagination from "@/components/shared/pagination.vue";
-import dynamicDialog from "@/components/shared/dynamic-dialog.vue";
-import deleteDialog from "@/components/shared/delete-dialog.vue";
-import searchInput from "@/components/shared/search-input.vue";
-import skeletonTable from "@/components/shared/skeleton-table.vue";
 
 const { triggerToast } = useToast();
 const componentStore = useComponentStore();
