@@ -21,6 +21,12 @@
                     </button>
                 </div>
             </div>
+
+            <div class="mb-6 flex justify-end">
+                <search-input v-model="searchQuery" @clear="handleClear" @search="handleSearch"
+                    placeholder="Search for components..." class="max-w-sm" />
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white border border-gray-100 hover:border-gray-300">
                     <thead class="bg-gray-100 whitespace-nowrap">
@@ -35,26 +41,8 @@
                     <tbody class="whitespace-nowrap">
                         <!-- Skeleton Loading State -->
                         <template v-if="isRefreshing">
-                            <tr class="border-b" v-for="i in 10" :key="'skeleton-' + i">
-                                <td class="p-4">
-                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-8"></div>
-                                </td>
-                                <td class="p-4">
-                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-                                </td>
-                                <td class="p-4">
-                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                                </td>
-                                <td class="p-4">
-                                    <div class="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
-                                </td>
-                                <td class="p-4">
-                                    <div class="flex items-center gap-4">
-                                        <div class="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-                                        <div class="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- skeleton-table component -->
+                            <skeleton-table />
                         </template>
 
                         <!-- Actual Data -->
@@ -109,7 +97,7 @@
 
             <div class="flex justify-end">
                 <!-- pagination component -->
-                <pagination :items="components" :items-per-page="20" v-model:current-page="currentPage" />
+                <pagination :items="filteredComponents" :items-per-page="20" v-model:current-page="currentPage" />
             </div>
 
             <!-- dynamic-dialog component -->
@@ -125,13 +113,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useComponentStore } from "@/stores/componentStore";
 import type { Component } from "@/types/components";
 import { useToast } from "@/composables/useToast";
-import pagination from "@/components/pagination.vue";
-import dynamicDialog from "@/components/dynamic-dialog.vue";
-import deleteDialog from "@/components/delete-dialog.vue";
+import pagination from "@/components/shared/pagination.vue";
+import dynamicDialog from "@/components/shared/dynamic-dialog.vue";
+import deleteDialog from "@/components/shared/delete-dialog.vue";
+import searchInput from "@/components/shared/search-input.vue";
+import skeletonTable from "@/components/shared/skeleton-table.vue";
 
 const { triggerToast } = useToast();
 const componentStore = useComponentStore();
@@ -144,11 +134,12 @@ const isRefreshing = ref(false);
 const showDeleteDialog = ref(false);
 const deleteComponentIndex = ref<number | null>(null);
 const deleteComponentName = ref<string>("");
+const searchQuery = ref("");
 
 const paginatedComponents = computed(() => {
     const start = (currentPage.value - 1) * 20;
     const end = start + 20;
-    return components.value.slice(start, end);
+    return filteredComponents.value.slice(start, end);
 });
 
 const components = computed(() => componentStore.components as Component[]);
@@ -274,6 +265,29 @@ const confirmDelete = async () => {
         }
         closeDeleteDialog();
     }
+};
+
+const filteredComponents = computed(() => {
+    if (!searchQuery.value.trim()) {
+        return components.value;
+    }
+    const query = searchQuery.value.toLowerCase().trim();
+    return components.value.filter((component) =>
+        component.name.toLowerCase().includes(query)
+    );
+});
+
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
+
+const handleSearch = (query: string) => {
+    console.log('Search triggered:', query);
+    // Optional: Could trigger server-side search or analytics
+};
+
+const handleClear = () => {
+    currentPage.value = 1; // Reset pagination
 };
 
 onMounted(async () => {
