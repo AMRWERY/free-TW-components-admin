@@ -59,7 +59,10 @@
                                     {{ component.category }}
                                 </td>
                                 <td class="p-4 text-[15px] text-slate-600 font-medium">
-                                    {{ component.copy_count }}
+                                    <span
+                                        class="px-2 py-1 text-green-600 bg-blue-100 hover:bg-blue-400 hover:text-gray-100 rounded-full">
+                                        {{ component.copy_count }}
+                                    </span>
                                 </td>
                                 <td class="p-4">
                                     <div class="flex items-center justify-end gap-4">

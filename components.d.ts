@@ -11,6 +11,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CategoryCard: typeof import('./src/components/dashboard/category-card.vue')['default']
+    ComponentCard: typeof import('./src/components/dashboard/component-card.vue')['default']
     DeleteDialog: typeof import('./src/components/shared/delete-dialog.vue')['default']
     DynamicDialog: typeof import('./src/components/shared/dynamic-dialog.vue')['default']
     DynamicToast: typeof import('./src/components/shared/dynamic-toast.vue')['default']

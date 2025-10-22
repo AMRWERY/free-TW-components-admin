@@ -18,7 +18,6 @@ export default defineConfig({
         "vue",
         "vue-router",
         "pinia",
-        "vue-i18n",
         // example type import
         {
           from: "vue-router",
