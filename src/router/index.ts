@@ -16,10 +16,10 @@ const router = createRouter({
       meta: { title: "Components" },
     },
     {
-      path: "/add-category",
-      name: "add-category",
-      component: () => import("../views/add-category.vue"),
-      meta: { title: "Add Category" },
+      path: "/categories",
+      name: "categories",
+      component: () => import("../views/categories.vue"),
+      meta: { title: "Categories" },
     },
   ],
 
