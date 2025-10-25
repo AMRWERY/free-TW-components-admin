@@ -3,7 +3,8 @@ export interface Component {
   name: string;
   category: string;
   copy_count: number;
-  code?: string; // Optional if not always present
-  created_at?: any; // Timestamp from Firestore
+  code?: string;
+  created_at?: any;
   route?: string;
+  thumbnail?: string | null;
 }

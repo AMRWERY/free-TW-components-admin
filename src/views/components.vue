@@ -41,7 +41,6 @@
                     <tbody class="whitespace-nowrap">
                         <!-- Skeleton Loading State -->
                         <template v-if="isRefreshing">
-                            <!-- skeleton-table component -->
                             <skeleton-table />
                         </template>
 
@@ -99,16 +98,13 @@
             </div>
 
             <div class="flex justify-end">
-                <!-- pagination component -->
                 <pagination :items="filteredComponents" :items-per-page="20" v-model:current-page="currentPage" />
             </div>
 
-            <!-- dynamic-dialog component -->
             <dynamic-dialog v-if="showDialog" :is-open="showDialog" :mode="dialogMode"
                 :categories="componentStore.categories" :initial-data="editComponent" :loading="componentStore.loading"
                 @close="closeDialog" @submit="handleDialogSubmit" />
 
-            <!-- delete-dialog component -->
             <delete-dialog v-if="showDeleteDialog" :is-open="showDeleteDialog" :component-name="deleteComponentName"
                 @close="closeDeleteDialog" @delete="confirmDelete" />
         </div>
@@ -139,7 +135,7 @@ const paginatedComponents = computed(() => {
 
 const components = computed(() => componentStore.components as Component[]);
 
-const editComponent = computed((): { name: string; category: string; code: string } | undefined => {
+const editComponent = computed((): { name: string; category: string; code: string; thumbnail?: string | null } | undefined => {
     if (editingIndex.value !== null) {
         const component = paginatedComponents.value[editingIndex.value];
         if (component) {
@@ -147,6 +143,7 @@ const editComponent = computed((): { name: string; category: string; code: strin
                 name: component.name,
                 category: component.category,
                 code: component.code || "",
+                thumbnail: component.thumbnail || null,
             };
         }
     }
@@ -168,31 +165,28 @@ const closeDialog = () => {
     editingIndex.value = null;
 };
 
-const handleDialogSubmit = async (data: { name: string; category: string; code: string }) => {
-    if (dialogMode.value === "add") {
-        await componentStore.addComponent(data.category, data.name, data.code);
-        if (!componentStore.error) {
+const handleDialogSubmit = async (data: { name: string; category?: string; code?: string; thumbnail?: File | null | undefined }) => {
+    try {
+        if (dialogMode.value === "add") {
+            if (!data.category) {
+                throw new Error("Category is required");
+            }
+            const thumbnail = data.thumbnail !== undefined ? data.thumbnail : null;
+            await componentStore.addComponent(data.category, data.name, data.code || "", thumbnail);
             triggerToast({
                 message: "Component added successfully!",
                 type: "success",
                 icon: "/svg/check-circle-icon.svg",
             });
-        } else {
-            triggerToast({
-                message: `Error: ${componentStore.error}`,
-                type: "error",
-                icon: "/svg/error-icon.svg",
-            });
-        }
-    } else if (dialogMode.value === "edit" && editingIndex.value !== null) {
-        const component = components.value[editingIndex.value];
-        if (component && component.id) {
-            await componentStore.updateComponent(component.id, {
-                category: data.category,
-                name: data.name,
-                code: data.code,
-            });
-            if (!componentStore.error) {
+        } else if (dialogMode.value === "edit" && editingIndex.value !== null) {
+            const component = components.value[editingIndex.value];
+            if (component && component.id) {
+                await componentStore.updateComponent(component.id, {
+                    category: data.category || "",
+                    name: data.name,
+                    code: data.code || "",
+                    thumbnail: data.thumbnail, // Can be File | null | undefined
+                });
                 triggerToast({
                     message: "Component updated successfully!",
                     type: "success",
@@ -200,18 +194,18 @@ const handleDialogSubmit = async (data: { name: string; category: string; code: 
                 });
             } else {
                 triggerToast({
-                    message: `Error: ${componentStore.error}`,
+                    message: "Component not found for update",
                     type: "error",
                     icon: "/svg/error-icon.svg",
                 });
             }
-        } else {
-            triggerToast({
-                message: "Component not found for update",
-                type: "error",
-                icon: "/svg/error-icon.svg",
-            });
         }
+    } catch (err: any) {
+        triggerToast({
+            message: `Error: ${err.message}`,
+            type: "error",
+            icon: "/svg/error-icon.svg",
+        });
     }
     closeDialog();
 };
@@ -220,7 +214,7 @@ const refreshData = async () => {
     isRefreshing.value = true;
     await componentStore.fetchComponents();
     isRefreshing.value = false;
-    if (!componentStore.error) return
+    if (!componentStore.error) return;
 };
 
 const openDeleteDialog = (index: number) => {
@@ -249,7 +243,7 @@ const confirmDelete = async () => {
                     type: "success",
                     icon: "/svg/check-circle-icon.svg",
                 });
-                await refreshData(); // Refresh table after deletion
+                await refreshData();
             } else {
                 triggerToast({
                     message: `Error deleting component: ${componentStore.error}`,
@@ -278,11 +272,10 @@ watch(searchQuery, () => {
 
 const handleSearch = (query: string) => {
     console.log('Search triggered:', query);
-    // Optional: Could trigger server-side search or analytics
 };
 
 const handleClear = () => {
-    currentPage.value = 1; // Reset pagination
+    currentPage.value = 1;
 };
 
 onMounted(async () => {
