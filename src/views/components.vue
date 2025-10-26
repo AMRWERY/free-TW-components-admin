@@ -65,8 +65,10 @@
                                 </td>
                                 <td class="p-4">
                                     <div class="flex items-center justify-end gap-4">
-                                        <button class="mr-3 cursor-pointer" title="Edit" v-if="editingIndex !== index"
-                                            @click="openDialog('edit', index)">
+                                        <!-- ✅ FIXED: Check against component.id instead of index -->
+                                        <button class="mr-3 cursor-pointer" title="Edit"
+                                            v-if="editingComponentId !== component.id"
+                                            @click="openDialog('edit', component.id)">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="w-5 h-5 fill-blue-500 hover:fill-blue-700"
                                                 viewBox="0 0 348.882 348.882">
@@ -78,7 +80,8 @@
                                                     data-original="#000000" />
                                             </svg>
                                         </button>
-                                        <button title="Delete" class="cursor-pointer" @click="openDeleteDialog(index)">
+                                        <button title="Delete" class="cursor-pointer"
+                                            @click="openDeleteDialog(component.id)">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="w-5 h-5 fill-red-500 hover:fill-red-700" viewBox="0 0 24 24">
                                                 <path
@@ -117,13 +120,14 @@ import type { Component } from "@/types/components";
 const { triggerToast } = useToast();
 const componentStore = useComponentStore();
 
-const editingIndex = ref<number | null>(null);
+// ✅ CHANGED: Use component ID instead of index
+const editingComponentId = ref<string | null>(null);
 const currentPage = ref(1);
 const showDialog = ref(false);
 const dialogMode = ref<"add" | "edit">("add");
 const isRefreshing = ref(false);
 const showDeleteDialog = ref(false);
-const deleteComponentIndex = ref<number | null>(null);
+const deleteComponentId = ref<string | null>(null);
 const deleteComponentName = ref<string>("");
 const searchQuery = ref("");
 
@@ -135,9 +139,10 @@ const paginatedComponents = computed(() => {
 
 const components = computed(() => componentStore.components as Component[]);
 
+// ✅ CHANGED: Find component by ID instead of index
 const editComponent = computed((): { name: string; category: string; code: string; thumbnail?: string | null } | undefined => {
-    if (editingIndex.value !== null) {
-        const component = paginatedComponents.value[editingIndex.value];
+    if (editingComponentId.value !== null) {
+        const component = components.value.find(c => c.id === editingComponentId.value);
         if (component) {
             return {
                 name: component.name,
@@ -150,21 +155,23 @@ const editComponent = computed((): { name: string; category: string; code: strin
     return undefined;
 });
 
-const openDialog = (mode: "add" | "edit", index?: number) => {
+// ✅ CHANGED: Accept component ID instead of index
+const openDialog = (mode: "add" | "edit", componentId?: string) => {
     dialogMode.value = mode;
-    if (mode === "edit" && index !== undefined) {
-        editingIndex.value = index;
+    if (mode === "edit" && componentId) {
+        editingComponentId.value = componentId;
     } else {
-        editingIndex.value = null;
+        editingComponentId.value = null;
     }
     showDialog.value = true;
 };
 
 const closeDialog = () => {
     showDialog.value = false;
-    editingIndex.value = null;
+    editingComponentId.value = null;
 };
 
+// ✅ CHANGED: Use editingComponentId instead of editingIndex
 const handleDialogSubmit = async (data: { name: string; category?: string; code?: string; thumbnail?: File | null | undefined }) => {
     try {
         if (dialogMode.value === "add") {
@@ -178,27 +185,19 @@ const handleDialogSubmit = async (data: { name: string; category?: string; code?
                 type: "success",
                 icon: "/svg/check-circle-icon.svg",
             });
-        } else if (dialogMode.value === "edit" && editingIndex.value !== null) {
-            const component = components.value[editingIndex.value];
-            if (component && component.id) {
-                await componentStore.updateComponent(component.id, {
-                    category: data.category || "",
-                    name: data.name,
-                    code: data.code || "",
-                    thumbnail: data.thumbnail, // Can be File | null | undefined
-                });
-                triggerToast({
-                    message: "Component updated successfully!",
-                    type: "success",
-                    icon: "/svg/check-circle-icon.svg",
-                });
-            } else {
-                triggerToast({
-                    message: "Component not found for update",
-                    type: "error",
-                    icon: "/svg/error-icon.svg",
-                });
-            }
+        } else if (dialogMode.value === "edit" && editingComponentId.value !== null) {
+            // ✅ FIXED: Use editingComponentId directly
+            await componentStore.updateComponent(editingComponentId.value, {
+                category: data.category || "",
+                name: data.name,
+                code: data.code || "",
+                thumbnail: data.thumbnail,
+            });
+            triggerToast({
+                message: "Component updated successfully!",
+                type: "success",
+                icon: "/svg/check-circle-icon.svg",
+            });
         }
     } catch (err: any) {
         triggerToast({
@@ -217,9 +216,10 @@ const refreshData = async () => {
     if (!componentStore.error) return;
 };
 
-const openDeleteDialog = (index: number) => {
-    deleteComponentIndex.value = index;
-    const component = paginatedComponents.value[index];
+// ✅ CHANGED: Accept component ID instead of index
+const openDeleteDialog = (componentId: string) => {
+    deleteComponentId.value = componentId;
+    const component = components.value.find(c => c.id === componentId);
     if (component) {
         deleteComponentName.value = component.name;
         showDeleteDialog.value = true;
@@ -228,29 +228,27 @@ const openDeleteDialog = (index: number) => {
 
 const closeDeleteDialog = () => {
     showDeleteDialog.value = false;
-    deleteComponentIndex.value = null;
+    deleteComponentId.value = null;
     deleteComponentName.value = "";
 };
 
+// ✅ CHANGED: Use deleteComponentId instead of deleteComponentIndex
 const confirmDelete = async () => {
-    if (deleteComponentIndex.value !== null) {
-        const component = paginatedComponents.value[deleteComponentIndex.value];
-        if (component && component.id) {
-            await componentStore.deleteComponent(component.id);
-            if (!componentStore.error) {
-                triggerToast({
-                    message: "Component deleted successfully!",
-                    type: "success",
-                    icon: "/svg/check-circle-icon.svg",
-                });
-                await refreshData();
-            } else {
-                triggerToast({
-                    message: `Error deleting component: ${componentStore.error}`,
-                    type: "error",
-                    icon: "/svg/error-icon.svg",
-                });
-            }
+    if (deleteComponentId.value !== null) {
+        await componentStore.deleteComponent(deleteComponentId.value);
+        if (!componentStore.error) {
+            triggerToast({
+                message: "Component deleted successfully!",
+                type: "success",
+                icon: "/svg/check-circle-icon.svg",
+            });
+            await refreshData();
+        } else {
+            triggerToast({
+                message: `Error deleting component: ${componentStore.error}`,
+                type: "error",
+                icon: "/svg/error-icon.svg",
+            });
         }
         closeDeleteDialog();
     }
