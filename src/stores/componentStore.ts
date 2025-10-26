@@ -36,7 +36,7 @@ export const useComponentStore = defineStore("componentStore", {
               resolve(result);
             };
             reader.onerror = (error) => {
-              console.error("Error converting thumbnail:", error);
+              // console.error("Error converting thumbnail:", error);
               reject(error);
             };
             reader.readAsDataURL(thumbnail);
@@ -81,7 +81,7 @@ export const useComponentStore = defineStore("componentStore", {
               resolve(result);
             };
             reader.onerror = (error) => {
-              console.error("Error converting thumbnail:", error);
+              // console.error("Error converting thumbnail:", error);
               reject(error);
             };
             reader.readAsDataURL(updates.thumbnail!);

@@ -84,7 +84,7 @@ export const useCategoryStore = defineStore("categoryStore", () => {
       })) as Category[];
     } catch (err: any) {
       error.value = err.message;
-      console.error("Error fetching categories:", err);
+      // console.error("Error fetching categories:", err);
       throw err;
     } finally {
       loading.value = false;
