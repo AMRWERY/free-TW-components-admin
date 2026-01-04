@@ -32,11 +32,12 @@
 const props = defineProps<{
     items: any[];
     itemsPerPage: number;
+    currentPage: number;
 }>();
 
 const emit = defineEmits(["update:currentPage"]);
 
-const currentPage = ref(1);
+
 
 const totalPages = computed(() => Math.ceil(props.items.length / props.itemsPerPage));
 
@@ -50,8 +51,8 @@ const displayedPages = computed(() => {
         }
     } else {
         pages.push(1);
-        const startPage = Math.max(2, currentPage.value - halfVisible);
-        const endPage = Math.min(totalPages.value - 1, currentPage.value + halfVisible);
+        const startPage = Math.max(2, props.currentPage - halfVisible);
+        const endPage = Math.min(totalPages.value - 1, props.currentPage + halfVisible);
         if (startPage > 2) {
             pages.push("...");
         }
@@ -68,12 +69,7 @@ const displayedPages = computed(() => {
 
 const changePage = (page: number | string) => {
     if (typeof page === "number" && page > 0 && page <= totalPages.value) {
-        currentPage.value = page;
         emit("update:currentPage", page);
     }
 };
-
-watch(() => props.items, () => {
-    currentPage.value = 1; // Reset to first page when items change
-});
 </script>

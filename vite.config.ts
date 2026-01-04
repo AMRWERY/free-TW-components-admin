@@ -39,4 +39,28 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Split Firebase into its own chunk
+          if (id.includes("firebase")) {
+            return "firebase";
+          }
+          // Split Vue ecosystem into separate chunks
+          if (
+            id.includes("node_modules/vue") ||
+            id.includes("node_modules/pinia")
+          ) {
+            return "vue";
+          }
+          // Split vue-router separately
+          if (id.includes("node_modules/vue-router")) {
+            return "vue-router";
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600, // Increase warning limit slightly
+  },
 });
