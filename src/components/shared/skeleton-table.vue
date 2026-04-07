@@ -1,29 +1,17 @@
 <template>
-    <tr class="border-b" v-for="i in 10" :key="'skeleton-' + i">
-        <td v-for="(columnType, colIndex) in columnConfigs" :key="'col-' + colIndex" class="p-4">
-            <!-- Index Column (#) -->
-            <div v-if="columnType === 'index'" class="h-4 bg-gray-200 rounded animate-pulse w-8"></div>
-
-            <!-- Name/Text Column -->
-            <div v-else-if="columnType === 'name'" class="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
-
-            <!-- Short Text Column -->
-            <div v-else-if="columnType === 'short'" class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-
-            <!-- Number Column -->
-            <div v-else-if="columnType === 'number'" class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
-
-            <!-- Date Column -->
-            <div v-else-if="columnType === 'date'" class="h-4 bg-gray-200 rounded animate-pulse w-28"></div>
-
-            <!-- Actions Column -->
-            <div v-else-if="columnType === 'actions'" class="flex items-center gap-4 w-full justify-end">
-                <div class="h-5 w-5 bg-gray-200 rounded-full animate-pulse"></div>
-                <div class="h-5 w-5 bg-gray-200 rounded-full animate-pulse"></div>
+    <tr class="border-b border-white/5" v-for="i in 8" :key="'skeleton-' + i">
+        <td v-for="(columnType, colIndex) in columnConfigs" :key="'col-' + colIndex" class="px-5 py-4">
+            <div v-if="columnType === 'index'" class="h-3.5 bg-white/5 rounded-md animate-pulse w-6"></div>
+            <div v-else-if="columnType === 'name'" class="h-3.5 bg-white/5 rounded-md animate-pulse"
+                :style="{ width: `${100 + (i * 13) % 80}px` }"></div>
+            <div v-else-if="columnType === 'short'" class="h-6 bg-white/[0.04] rounded-full animate-pulse w-24"></div>
+            <div v-else-if="columnType === 'number'" class="h-5 bg-white/5 rounded-full animate-pulse w-16"></div>
+            <div v-else-if="columnType === 'date'" class="h-3.5 bg-white/5 rounded-md animate-pulse w-24"></div>
+            <div v-else-if="columnType === 'actions'" class="flex items-center justify-end gap-2">
+                <div class="h-7 w-7 bg-white/5 rounded-lg animate-pulse"></div>
+                <div class="h-7 w-7 bg-white/5 rounded-lg animate-pulse"></div>
             </div>
-
-            <!-- Default Text Column -->
-            <div v-else class="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+            <div v-else class="h-3.5 bg-white/5 rounded-md animate-pulse w-28"></div>
         </td>
     </tr>
 </template>
@@ -36,38 +24,19 @@ const props = withDefaults(defineProps<Props>(), {
     config: () => [],
 });
 
-// Generate column configuration based on props
 const columnConfigs = computed(() => {
-    // If custom config provided, use it
-    if (props.config && props.config.length > 0) {
-        return props.config;
-    }
-    // Always start with index column
+    if (props.config && props.config.length > 0) return props.config;
     const config: ('index' | 'name' | 'short' | 'number' | 'date' | 'actions')[] = ['index'];
-    // Generate config based on TOTAL columns needed (including index)
     const totalColumns = props.columns || 5;
     switch (totalColumns) {
-        case 2: // Minimal: # + Actions
+        case 2: config.push('actions'); break;
+        case 3: config.push('name', 'actions'); break;
+        case 4: config.push('name', 'date', 'actions'); break;
+        case 5: config.push('name', 'short', 'number', 'actions'); break;
+        case 6: config.push('name', 'short', 'number', 'date', 'actions'); break;
+        default:
+            for (let i = 1; i < totalColumns - 1; i++) config.push('name');
             config.push('actions');
-            break;
-        case 3: // # + Name + Actions
-            config.push('name', 'actions');
-            break;
-        case 4: // Categories: # + Name + Date + Actions
-            config.push('name', 'date', 'actions');
-            break;
-        case 5: // Components: # + Name + Short + Number + Actions
-            config.push('name', 'short', 'number', 'actions');
-            break;
-        case 6: // # + Name + Short + Number + Date + Actions
-            config.push('name', 'short', 'number', 'date', 'actions');
-            break;
-        default: // Any other number, fill with name columns + actions
-            for (let i = 1; i < totalColumns - 1; i++) {
-                config.push('name');
-            }
-            config.push('actions');
-            break;
     }
     return config;
 });

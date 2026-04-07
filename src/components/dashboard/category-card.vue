@@ -1,24 +1,23 @@
 <template>
-    <div>
-        <div
-            class="group cursor-pointer bg-white dark:bg-[#1a1a24] rounded-3xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 dark:border-gray-800/50 hover:border-blue-200 dark:hover:border-blue-800/50">
-            <!-- Icon - Centered -->
-            <div class="flex justify-center mb-6">
-                <div class="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl text-white shadow-lg">
-                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-            </div>
+    <div class="group cursor-pointer bg-[#13131a] rounded-xl p-5 border border-white/5
+        hover:border-cyan-500/20 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden relative">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
-            <!-- Title - Centered -->
-            <h3
-                class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">
-                {{ category.name }}
-            </h3>
+        <!-- Icon -->
+        <div class="flex justify-center mb-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                        clip-rule="evenodd" />
+                </svg>
+            </div>
         </div>
+
+        <!-- Name -->
+        <h3 class="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors text-center truncate">
+            {{ category.name }}
+        </h3>
     </div>
 </template>
 
@@ -26,7 +25,7 @@
 defineProps<{
     category: {
         name: string
-        count: number
+        count?: number
         topComponent?: any
     }
 }>()

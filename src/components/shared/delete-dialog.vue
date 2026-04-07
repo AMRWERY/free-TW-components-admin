@@ -1,37 +1,51 @@
 <template>
-    <div>
-        <Transition name="fade">
-            <div v-if="props.isOpen"
-                class="fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto">
-                <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 relative">
-                    <div class="my-8 text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-14 fill-red-500 inline" viewBox="0 0 24 24">
-                            <path
-                                d="M19 7a1 1 0 0 0-1 1v11.191A1.92 1.92 0 0 1 15.99 21H8.01A1.92 1.92 0 0 1 6 19.191V8a1 1 0 0 0-2 0v11.191A3.918 3.918 0 0 0 8.01 23h7.98A3.918 3.918 0 0 0 20 19.191V8a1 1 0 0 0-1-1Zm1-3h-4V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H4a1 1 0 0 0 0 2h16a1 1 0 0 0 0-2ZM10 4V3h4v1Z"
-                                data-original="#000000" />
-                            <path d="M11 17v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Zm4 0v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Z"
-                                data-original="#000000" />
-                        </svg>
-                        <div class="mt-6">
-                            <h4 class="text-slate-900 text-lg font-semibold">Are you sure you want to delete it?</h4>
-                            <p class="text-lg text-slate-600 mt-3 hover:text-slate-800 hover:underline cursor-pointer">
-                                {{
-                                    props.componentName }}</p>
-                        </div>
-                    </div>
+    <Transition name="dialog">
+        <div v-if="props.isOpen"
+            class="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="$emit('close')"></div>
 
-                    <div class="flex gap-4 mt-8">
-                        <button id="closeButton" type="button" @click="$emit('close')"
-                            class="px-5 py-2.5 rounded-md cursor-pointer w-full text-slate-900 text-sm font-medium bg-gray-200 hover:bg-gray-300 active:bg-gray-200">No,
-                            Cancel</button>
-                        <button type="button" @click="$emit('delete')"
-                            class="px-5 py-2.5 rounded-md cursor-pointer w-full text-white text-sm font-medium bg-red-600 hover:bg-red-700 active:bg-red-600">Yes,
-                            Delete</button>
+            <!-- Modal Panel -->
+            <div class="relative w-full max-w-sm bg-[#13131a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-white/5">
+                    <h3 class="text-base font-semibold text-white">Confirm Delete</h3>
+                    <button @click="$emit('close')"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="px-6 py-6 text-center">
+                    <div class="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                     </div>
+                    <p class="text-sm text-gray-400 mb-1">Are you sure you want to delete</p>
+                    <p class="text-sm font-semibold text-white truncate px-4">{{ props.componentName }}</p>
+                    <p class="text-xs text-gray-600 mt-2">This action cannot be undone.</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3 px-6 pb-6">
+                    <button type="button" @click="$emit('close')"
+                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-300 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-200">
+                        Cancel
+                    </button>
+                    <button type="button" @click="$emit('delete')"
+                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-all duration-200">
+                        Delete
+                    </button>
                 </div>
             </div>
-        </Transition>
-    </div>
+        </div>
+    </Transition>
 </template>
 
 <script lang="ts" setup>
@@ -44,13 +58,14 @@ const emit = defineEmits(["close", "delete"]);
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.25s;
+.dialog-enter-active {
+    transition: all 0.2s ease-out;
 }
-
-.fade-enter-from,
-.fade-leave-to {
+.dialog-leave-active {
+    transition: all 0.15s ease-in;
+}
+.dialog-enter-from,
+.dialog-leave-to {
     opacity: 0;
 }
 </style>

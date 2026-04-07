@@ -25,25 +25,19 @@ export const useComponentStore = defineStore("componentStore", {
       code: string,
       thumbnail: File | null
     ) {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
         let thumbnailBase64: string | null = null;
         if (thumbnail) {
           thumbnailBase64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result);
-            };
-            reader.onerror = (error) => {
-              // console.error("Error converting thumbnail:", error);
-              reject(error);
-            };
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
             reader.readAsDataURL(thumbnail);
           });
-        } else {
         }
-        const docRef = await addDoc(collection(db, "components"), {
+        await addDoc(collection(db, "components"), {
           category,
           name,
           code,
@@ -53,11 +47,11 @@ export const useComponentStore = defineStore("componentStore", {
           thumbnail: thumbnailBase64,
         });
         await this.fetchComponents();
-        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
-        this.loading = false;
         throw err;
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -70,26 +64,21 @@ export const useComponentStore = defineStore("componentStore", {
         thumbnail?: File | null | undefined;
       }
     ) {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
         let thumbnailBase64: string | null | undefined = undefined;
         if (updates.thumbnail instanceof File) {
           thumbnailBase64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result as string;
-              resolve(result);
-            };
-            reader.onerror = (error) => {
-              // console.error("Error converting thumbnail:", error);
-              reject(error);
-            };
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
             reader.readAsDataURL(updates.thumbnail!);
           });
         } else if (updates.thumbnail === null) {
           thumbnailBase64 = null;
-        } else {
         }
+
         const updateData: {
           category: string;
           name: string;
@@ -103,23 +92,22 @@ export const useComponentStore = defineStore("componentStore", {
         if (thumbnailBase64 !== undefined) {
           updateData.thumbnail = thumbnailBase64;
         }
-        const docRef = doc(db, "components", id);
-        await updateDoc(docRef, updateData);
+
+        await updateDoc(doc(db, "components", id), updateData);
         await this.fetchComponents();
-        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
-        this.loading = false;
         throw err;
+      } finally {
+        this.loading = false;
       }
     },
 
     async fetchComponentById(id: string) {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
-        const docRef = doc(db, "components", id);
-        const docSnap = await getDoc(docRef);
-        this.loading = false;
+        const docSnap = await getDoc(doc(db, "components", id));
         if (docSnap.exists()) {
           return { id: docSnap.id, ...docSnap.data() };
         } else {
@@ -127,50 +115,53 @@ export const useComponentStore = defineStore("componentStore", {
         }
       } catch (err: any) {
         this.error = err.message;
-        this.loading = false;
         throw err;
+      } finally {
+        this.loading = false;
       }
     },
 
     async fetchCategories() {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
         const snapshot = await getDocs(collection(db, "categories"));
         this.categories = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
+      } finally {
         this.loading = false;
       }
     },
 
     async fetchComponents() {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
         const snapshot = await getDocs(collection(db, "components"));
         this.components = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
+      } finally {
         this.loading = false;
       }
     },
 
     async deleteComponent(id: string) {
+      this.loading = true;
+      this.error = null;
       try {
-        this.loading = true;
-        const docRef = doc(db, "components", id);
-        await deleteDoc(docRef);
+        await deleteDoc(doc(db, "components", id));
         await this.fetchComponents();
-        this.loading = false;
       } catch (err: any) {
         this.error = err.message;
+      } finally {
         this.loading = false;
       }
     },

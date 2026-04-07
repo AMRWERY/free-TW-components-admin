@@ -1,82 +1,124 @@
 <template>
-  <div>
-    <div class="py-8 min-h-screen">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold">All Categories</h2>
-        <div class="flex gap-2">
-          <search-input v-model="searchQuery" @clear="handleClear" @search="handleSearch"
-            placeholder="Search for Categories..." class="max-w-sm" />
+  <div class="pb-16">
 
-          <button
-            class="text-sm cursor-pointer relative px-3 py-2.5 overflow-hidden font-medium text-blue-600 bg-white border-2 border-blue-600 rounded-lg shadow-sm group hover:bg-blue-50 transition-colors"
-            @click="refreshData" :disabled="isRefreshing" title="Refresh">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" :class="{ 'animate-spin': isRefreshing }"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.001 8.001 0 01-15.356-2m15.356 2H15" />
-            </svg>
-          </button>
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pt-2">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Categories</h1>
+        <p class="text-sm text-gray-500 mt-1">Manage component categories</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <search-input v-model="searchQuery" @clear="handleClear" @search="handleSearch"
+          placeholder="Search categories..." class="w-64" />
 
-          <button
-            class="text-sm cursor-pointer relative px-6 py-2.5 overflow-hidden font-medium text-white bg-blue-600 rounded-lg shadow-sm group"
-            @click="openDialog('add')">
-            Add Category
-          </button>
-        </div>
+        <button
+          class="flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 hover:border-white/20 transition-all duration-200 flex-shrink-0"
+          @click="refreshData" :disabled="isRefreshing" title="Refresh">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.001 8.001 0 01-15.356-2m15.356 2H15" />
+          </svg>
+        </button>
+
+        <button
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-500 rounded-lg transition-colors duration-200 flex-shrink-0"
+          @click="openDialog('add')">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Add Category
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-[#13131a] border border-white/5 rounded-xl overflow-hidden">
+
+      <!-- Results info -->
+      <div v-if="!isRefreshing" class="px-5 py-3 border-b border-white/5 flex items-center justify-between">
+        <p class="text-xs text-gray-500">
+          <span class="text-gray-300 font-medium">{{ filteredCategories.length }}</span> categor{{ filteredCategories.length !== 1 ? 'ies' : 'y' }}
+          <template v-if="searchQuery"> matching "<span class="text-cyan-400">{{ searchQuery }}</span>"</template>
+        </p>
+        <p v-if="filteredCategories.length > 0" class="text-xs text-gray-600">
+          Page {{ currentPage }} of {{ Math.ceil(filteredCategories.length / 20) || 1 }}
+        </p>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-100 hover:border-gray-300">
-          <thead class="bg-gray-100 whitespace-nowrap">
-            <tr>
-              <th class="p-4 text-left text-[13px] font-semibold text-slate-900">
-                #
-              </th>
-              <th class="p-4 text-left text-[13px] font-semibold text-slate-900">
-                Name
-              </th>
-              <th class="p-4 text-left text-[13px] font-semibold text-slate-900"></th>
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b border-white/5">
+              <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-5 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody class="whitespace-nowrap">
+          <tbody class="divide-y divide-white/5">
             <template v-if="isRefreshing">
-              <!-- skeleton-table component -->
               <skeleton-table :columns="3" />
             </template>
 
-            <!-- Actual Data -->
-            <template v-else>
-              <tr class="hover:bg-gray-50 cursor-pointer border-b" v-for="(category, index) in paginatedCategories"
-                :key="category.id">
-                <td class="p-4 text-[15px] text-slate-600 font-medium">
+            <template v-else-if="paginatedCategories.length">
+              <tr v-for="(category, index) in paginatedCategories" :key="category.id"
+                class="hover:bg-white/[0.02] transition-colors group">
+                <td class="px-5 py-4 text-sm text-gray-600 tabular-nums">
                   {{ ((currentPage as any) - 1) * 20 + index + 1 }}
                 </td>
-                <td class="p-4 text-[15px] text-slate-600 font-medium">
-                  {{ category.name }}
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-white/5 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-3.5 h-3.5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <span class="text-sm font-medium text-gray-200 group-hover:text-white transition-colors capitalize">
+                      {{ category.name }}
+                    </span>
+                  </div>
                 </td>
-                <td class="p-4">
-                  <div class="flex items-center justify-end gap-4">
-                    <button class="mr-3 cursor-pointer" title="Edit" v-if="editingCategoryId !== category.id"
-                      @click="openDialog('edit', category.id)">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-blue-500 hover:fill-blue-700"
-                        viewBox="0 0 348.882 348.882">
-                        <path
-                          d="m333.988 11.758-.42-.383A43.363 43.363 0 0 0 304.258 0a43.579 43.579 0 0 0-32.104 14.153L116.803 184.231a14.993 14.993 0 0 0-3.154 5.37l-18.267 54.762c-2.112 6.331-1.052 13.333 2.835 18.729 3.918 5.438 10.23 8.685 16.886 8.685h.001c2.879 0 5.693-.592 8.362-1.76l52.89-23.138a14.985 14.985 0 0 0 5.063-3.626L336.771 73.176c16.166-17.697 14.919-45.247-2.783-61.418zM130.381 234.247l10.719-32.134.904-.99 20.316 18.556-.904.99-31.035 13.578zm184.24-181.304L182.553 197.53l-20.316-18.556L294.305 34.386c2.583-2.828 6.118-4.386 9.954-4.386 3.365 0 6.588 1.252 9.082 3.53l.419.383c5.484 5.009 5.87 13.546.861 19.03z"
-                          data-original="#000000" />
-                        <path
-                          d="M303.85 138.388c-8.284 0-15 6.716-15 15v127.347c0 21.034-17.113 38.147-38.147 38.147H68.904c-21.035 0-38.147-17.113-38.147-38.147V100.413c0-21.034 17.113-38.147 38.147-38.147h131.587c8.284 0 15-6.716 15-15s-6.716-15-15-15H68.904C31.327 32.266.757 62.837.757 100.413v180.321c0 37.576 30.571 68.147 68.147 68.147h181.798c37.576 0 68.147-30.571 68.147-68.147V153.388c.001-8.284-6.715-15-14.999-15z"
-                          data-original="#000000" />
+                <td class="px-5 py-4">
+                  <div class="flex items-center justify-end gap-1">
+                    <button v-if="editingCategoryId !== category.id"
+                      class="p-1.5 rounded-lg text-gray-500 hover:text-blue-400 hover:bg-blue-400/10 transition-all duration-200"
+                      title="Edit" @click="openDialog('edit', category.id)">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button title="Delete" class="cursor-pointer" @click="openDeleteDialog(category.id)">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-red-500 hover:fill-red-700"
-                        viewBox="0 0 24 24">
-                        <path
-                          d="M19 7a1 1 0 0 0-1 1v11.191A1.92 1.92 0 0 1 15.99 21H8.01A1.92 1.92 0 0 1 6 19.191V8a1 1 0 0 0-2 0v11.191A3.918 3.918 0 0 0 8.01 23h7.98A3.918 3.918 0 0 0 20 19.191V8a1 1 0 0 0-1-1Zm1-3h-4V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2H4a1 1 0 0 0 0 2h16a1 1 0 0 0 0-2ZM10 4V3h4v1Z"
-                          data-original="#000000" />
-                        <path d="M11 17v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Zm4 0v-7a1 1 0 0 0-2 0v7a1 1 0 0 0 2 0Z"
-                          data-original="#000000" />
+                    <button
+                      class="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
+                      title="Delete" @click="openDeleteDialog(category.id)">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+
+            <!-- Empty state -->
+            <template v-else>
+              <tr>
+                <td colspan="3" class="px-5 py-16 text-center">
+                  <div class="flex flex-col items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+                      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-500">
+                      {{ searchQuery ? 'No categories match your search.' : 'No categories yet. Add one to get started.' }}
+                    </p>
+                    <button v-if="!searchQuery"
+                      class="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                      @click="openDialog('add')">
+                      Add your first category →
                     </button>
                   </div>
                 </td>
@@ -86,20 +128,18 @@
         </table>
       </div>
 
-      <div class="flex justify-end">
-        <!-- pagination component -->
+      <!-- Pagination -->
+      <div v-if="filteredCategories.length > 20" class="px-5 py-3 border-t border-white/5">
         <pagination :items="filteredCategories" :items-per-page="20" v-model:current-page="currentPage" />
       </div>
-
-      <!-- dynamic-dialog component -->
-      <dynamic-dialog v-if="showDialog" :is-open="showDialog" :mode="dialogMode" :categories="[]"
-        :initial-data="editCategory" :loading="categoryStore.loading" @close="closeDialog"
-        @submit="handleDialogSubmit" />
-
-      <!-- delete-dialog component -->
-      <delete-dialog v-if="showDeleteDialog" :is-open="showDeleteDialog" :component-name="deleteCategoryName"
-        @close="closeDeleteDialog" @delete="confirmDelete" />
     </div>
+
+    <dynamic-dialog v-if="showDialog" :is-open="showDialog" :mode="dialogMode" :categories="[]"
+      :initial-data="editCategory" :loading="categoryStore.loading" @close="closeDialog"
+      @submit="handleDialogSubmit" />
+
+    <delete-dialog v-if="showDeleteDialog" :is-open="showDeleteDialog" :component-name="deleteCategoryName"
+      @close="closeDeleteDialog" @delete="confirmDelete" />
   </div>
 </template>
 
@@ -114,7 +154,6 @@ const router = useRouter();
 const editingCategoryId = ref<string | null>(null);
 const currentPage = ref(Number(route.query.page) || 1);
 
-// Sync URL with currentPage (use replace to avoid polluting browser history)
 watch(currentPage, (val) => {
   const currentQueryPage = Number(route.query.page) || 1;
   if (val !== currentQueryPage) {
@@ -122,16 +161,14 @@ watch(currentPage, (val) => {
   }
 });
 
-// Sync currentPage with URL (for back/forward navigation)
 watch(
   () => route.query.page,
   (val) => {
     const page = Number(val) || 1;
-    if (page !== currentPage.value) {
-      currentPage.value = page;
-    }
+    if (page !== currentPage.value) currentPage.value = page;
   }
 );
+
 const searchQuery = ref("");
 const showDialog = ref(false);
 const dialogMode = ref<"add" | "edit">("add");
@@ -142,34 +179,22 @@ const deleteCategoryName = ref<string>("");
 
 const paginatedCategories = computed(() => {
   const start = (currentPage.value - 1) * 20;
-  const end = start + 20;
-  return filteredCategories.value.slice(start, end);
+  return filteredCategories.value.slice(start, start + 20);
 });
 
 const categories = computed(() => categoryStore.categories as Category[]);
 
 const filteredCategories = computed(() => {
-  if (!searchQuery.value.trim()) {
-    return categories.value;
-  }
+  if (!searchQuery.value.trim()) return categories.value;
   const query = searchQuery.value.toLowerCase().trim();
-  return categories.value.filter((category) =>
-    category.name.toLowerCase().includes(query)
-  );
+  return categories.value.filter((c) => c.name.toLowerCase().includes(query));
 });
 
 const editCategory = computed(
   (): { name: string; category?: string; code?: string } | undefined => {
     if (editingCategoryId.value !== null) {
-      const category = categories.value.find(
-        (c) => c.id === editingCategoryId.value
-      );
-      if (category) {
-        return {
-          name: category.name,
-          // category and code are optional/empty for category mode
-        };
-      }
+      const category = categories.value.find((c) => c.id === editingCategoryId.value);
+      if (category) return { name: category.name };
     }
     return undefined;
   }
@@ -177,11 +202,7 @@ const editCategory = computed(
 
 const openDialog = (mode: "add" | "edit", categoryId?: string) => {
   dialogMode.value = mode;
-  if (mode === "edit" && categoryId) {
-    editingCategoryId.value = categoryId;
-  } else {
-    editingCategoryId.value = null;
-  }
+  editingCategoryId.value = mode === "edit" && categoryId ? categoryId : null;
   showDialog.value = true;
 };
 
@@ -191,46 +212,24 @@ const closeDialog = () => {
 };
 
 const handleDialogSubmit = async (data: { name: string }) => {
-  if (dialogMode.value === "add") {
-    await categoryStore.addCategory(data.name);
-    if (!categoryStore.error) {
-      triggerToast({
-        message: "Category added successfully!",
-        type: "success",
-        icon: "/svg/check-circle-icon.svg",
-      });
-    } else {
-      triggerToast({
-        message: `Error: ${categoryStore.error}`,
-        type: "error",
-        icon: "/svg/error-icon.svg",
-      });
+  try {
+    if (dialogMode.value === "add") {
+      await categoryStore.addCategory(data.name);
+      triggerToast({ message: "Category added successfully!", type: "success", icon: "/svg/check-circle-icon.svg" });
+    } else if (dialogMode.value === "edit" && editingCategoryId.value !== null) {
+      await categoryStore.updateCategory(editingCategoryId.value, data.name);
+      triggerToast({ message: "Category updated successfully!", type: "success", icon: "/svg/check-circle-icon.svg" });
     }
-  } else if (dialogMode.value === "edit" && editingCategoryId.value !== null) {
-    await categoryStore.updateCategory(editingCategoryId.value, data.name);
-    if (!categoryStore.error) {
-      triggerToast({
-        message: "Category updated successfully!",
-        type: "success",
-        icon: "/svg/check-circle-icon.svg",
-      });
-    } else {
-      triggerToast({
-        message: `Error: ${categoryStore.error}`,
-        type: "error",
-        icon: "/svg/error-icon.svg",
-      });
-    }
+  } catch (err: any) {
+    triggerToast({ message: `Error: ${err.message}`, type: "error", icon: "/svg/error-icon.svg" });
   }
   closeDialog();
-  await refreshData();
 };
 
 const refreshData = async () => {
   isRefreshing.value = true;
   try {
     await categoryStore.fetchCategories();
-    if (!categoryStore.error) return;
   } finally {
     isRefreshing.value = false;
   }
@@ -253,36 +252,20 @@ const closeDeleteDialog = () => {
 
 const confirmDelete = async () => {
   if (deleteCategoryId.value !== null) {
-    await categoryStore.deleteCategory(deleteCategoryId.value);
-    if (!categoryStore.error) {
-      triggerToast({
-        message: "Category deleted successfully!",
-        type: "success",
-        icon: "/svg/check-circle-icon.svg",
-      });
-      await refreshData();
-    } else {
-      triggerToast({
-        message: `Error deleting category: ${categoryStore.error}`,
-        type: "error",
-        icon: "/svg/error-icon.svg",
-      });
+    try {
+      await categoryStore.deleteCategory(deleteCategoryId.value);
+      triggerToast({ message: "Category deleted successfully!", type: "success", icon: "/svg/check-circle-icon.svg" });
+    } catch (err: any) {
+      triggerToast({ message: `Error deleting category: ${err.message}`, type: "error", icon: "/svg/error-icon.svg" });
     }
     closeDeleteDialog();
   }
 };
 
-watch(searchQuery, () => {
-  currentPage.value = 1;
-});
+watch(searchQuery, () => { currentPage.value = 1; });
 
-const handleSearch = (query: string) => {
-  console.log("Category search triggered:", query);
-};
-
-const handleClear = () => {
-  currentPage.value = 1;
-};
+const handleSearch = (_query: string) => {};
+const handleClear = () => { currentPage.value = 1; };
 
 onMounted(async () => {
   if (!categoryStore.categories.length) {

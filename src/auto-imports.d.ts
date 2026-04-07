@@ -72,6 +72,7 @@ declare global {
   const useComponentStore: typeof import('./stores/componentStore').useComponentStore
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
+  const useDarkMode: typeof import('./composables/useDarkMode').useDarkMode
   const useI18n: typeof import('vue-i18n').useI18n
   const useId: typeof import('vue').useId
   const useLink: typeof import('vue-router').useLink
